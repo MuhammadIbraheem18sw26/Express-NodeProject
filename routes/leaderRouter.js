@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const Leaders = require('../models/leaders');
 const { set } = require('mongoose');
 const leaderRouter = express.Router();
+const authenticate = require('../authenticate');
 
 
 
@@ -25,7 +26,7 @@ leaderRouter.route('/')
         })
     })
 
-    .post((req, res, next) => {
+    .post(authenticate.verifyUser, (req, res, next) => {
         Leaders.create(req.body).then((leader) => {
             console.log("leader Created ", leader)
             res.statusCode = 200;
@@ -43,7 +44,7 @@ leaderRouter.route('/')
     })
 
 
-    .delete((req, res, next) => {
+    .delete(authenticate.verifyUser, (req, res, next) => {
 
         Leaders.remove({}).then((response) => {
 
@@ -73,12 +74,12 @@ leaderRouter.route('/:leaderId')
 
     })
 
-    .post((req, res, next) => {
+    .post(authenticate.verifyUser, (req, res, next) => {
         res.statusCode = 403;
         res.end("Post operation is not supported on leaders/ " + req.params.leaderId);
     })
 
-    .put((req, res, next) => {
+    .put(authenticate.verifyUser, (req, res, next) => {
         Leaders.findByIdAndUpdate(req.params.leaderId, {
             $set: req.body
         }, {
@@ -94,7 +95,7 @@ leaderRouter.route('/:leaderId')
     })
 
 
-    .delete((req, res, next) => {
+    .delete(authenticate.verifyUser, (req, res, next) => {
 
         Leaders.findByIdAndRemove(req.params.leaderId).then((response) => {
 
@@ -106,10 +107,5 @@ leaderRouter.route('/:leaderId')
             next(err);
         })
     });
-
-
-
-
-
 
 module.exports = leaderRouter;
