@@ -43,7 +43,6 @@ const dishSchema = new Schema({
         type: String,
         require: true,
 
-
     },
 
     category: {

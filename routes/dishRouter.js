@@ -13,6 +13,7 @@ const dishRouterId = express.Router();
 dishRouter.use(bodyParser.json());
 dishRouterId.use(bodyParser.json());
 
+// view by any one 
 dishRouter.route('/')
     .get((req, res, next) => {
 
@@ -27,8 +28,8 @@ dishRouter.route('/')
                 next(err);
             })
     })
-
-    .post(authenticate.verifyUser, (req, res, next) => {
+    // only admin can POST Dishes 
+    .post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
         Dishes.create(req.body).then((dish) => {
             console.log("Dish Created ", dish)
             res.statusCode = 200;
@@ -39,14 +40,14 @@ dishRouter.route('/')
             next(err);
         })
     })
-
-    .put(authenticate.verifyUser, (req, res, next) => {
+    // only admin can PUT Dishes 
+    .put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
         res.statusCode = 403;
         res.end("Put operation is not supported on dishes ");
     })
 
-
-    .delete(authenticate.verifyUser, (req, res, next) => {
+    // only admin can DElete Dishes 
+    .delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
 
         Dishes.remove({}).then((response) => {
 
@@ -63,7 +64,6 @@ dishRouter.route('/')
 
 dishRouter.route('/:dishId')
 
-
     .get((req, res, next) => {
         Dishes.findById(req.params.dishId)
             .populate('comments.author').then((dish) => {
@@ -76,13 +76,13 @@ dishRouter.route('/:dishId')
             })
 
     })
-
-    .post(authenticate.verifyUser, (req, res, next) => {
+    // only admin can POST Dishes
+    .post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
         res.statusCode = 403;
         res.end("Post operation is not supported on dishes/ " + req.params.dishId);
     })
-
-    .put(authenticate.verifyUser, (req, res, next) => {
+    // only admin can PUT Dishes
+    .put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
         Dishes.findByIdAndUpdate(req.params.dishId, {
             $set: req.body
         }, {
@@ -97,8 +97,8 @@ dishRouter.route('/:dishId')
         })
     })
 
-
-    .delete(authenticate.verifyUser, (req, res, next) => {
+    // only admin can DElete Dishes
+    .delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
 
         Dishes.findByIdAndRemove(req.params.dishId).then((response) => {
 
@@ -132,6 +132,7 @@ dishRouter.route('/:dishId/comments')
         })
     })
 
+    // only user it self  can post comment
     .post(authenticate.verifyUser, (req, res, next) => {
         Dishes.findById(req.params.dishId).then((dish) => {
             if (dish != null) {
@@ -161,14 +162,14 @@ dishRouter.route('/:dishId/comments')
             next(err);
         })
     })
-
+    // only user it self  can PUT comment
     .put(authenticate.verifyUser, (req, res, next) => {
         res.statusCode = 403;
         res.end("Put operation is not supported on dishes " + req.params.dishId + ' /comments');
     })
 
-
-    .delete(authenticate.verifyUser, (req, res, next) => {
+    // both user & admin can delete comments 
+    .delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
 
         Dishes.findById(req.params.dishId).then((dish) => {
             if (dish != null) {
@@ -228,12 +229,13 @@ dishRouter.route('/:dishId/comments/:commentsId')
             })
 
     })
-
+    // this operation is not supported 
     .post(authenticate.verifyUser, (req, res, next) => {
         res.statusCode = 403;
         res.end("Post operation is not supported on dishes/ " + req.params.dishId + '/comments' + req.params.commentId);
     })
 
+    // only user can perforn this operation 
     .put(authenticate.verifyUser, (req, res, next) => {
         Dishes.findById(req.params.dishId).then((dish) => {
             if (dish != null && dish.comments.id(req.params.commentId) != null) {
@@ -273,7 +275,7 @@ dishRouter.route('/:dishId/comments/:commentsId')
         })
     })
 
-
+    // only user can perforn this operation 
     .delete(authenticate.verifyUser, (req, res, next) => {
 
         Dishes.findById(req.params.dishId).then((dish) => {
