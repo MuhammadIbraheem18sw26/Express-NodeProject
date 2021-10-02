@@ -5,6 +5,7 @@ const Promotions = require('../models/promotions');
 const { set } = require('mongoose');
 const promoRouter = express.Router();
 const authenticate = require('../authenticate')
+const cors = require('./cors');
 
 
 
@@ -14,7 +15,8 @@ promoRouter.use(bodyParser.json());
 
 
 promoRouter.route('/')
-    .get((req, res, next) => {
+    .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+    .get(cors.cors, (req, res, next) => {
 
         Promotions.find({}).then((promo) => {
             res.statusCode = 200;
@@ -26,7 +28,7 @@ promoRouter.route('/')
         })
     })
 
-    .post(authenticate.verifyUser, (req, res, next) => {
+    .post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
         Promotions.create(req.body).then((promo) => {
             console.log("promo Created ", promo)
             res.statusCode = 200;
@@ -38,13 +40,13 @@ promoRouter.route('/')
         })
     })
 
-    .put(authenticate.verifyUser, (req, res, next) => {
+    .put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
         res.statusCode = 403;
         res.end("Put operation is not supported on Promotions ");
     })
 
 
-    .delete(authenticate.verifyUser, (req, res, next) => {
+    .delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
 
         Leaders.remove({}).then((response) => {
 
@@ -62,7 +64,8 @@ promoRouter.route('/')
 promoRouter.route('/:promoId')
 
 
-    .get((req, res, next) => {
+    .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+    .get(cors.cors, (req, res, next) => {
         Promotions.findById(req.params.promoId).then((promo) => {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
@@ -74,12 +77,12 @@ promoRouter.route('/:promoId')
 
     })
 
-    .post(authenticate.verifyUser, (req, res, next) => {
+    .post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
         res.statusCode = 403;
         res.end("Post operation is not supported on promos/ " + req.params.promoId);
     })
 
-    .put(authenticate.verifyUser, (req, res, next) => {
+    .put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
         Promotions.findByIdAndUpdate(req.params.promoId, {
             $set: req.body
         }, {
@@ -95,7 +98,7 @@ promoRouter.route('/:promoId')
     })
 
 
-    .delete(authenticate.verifyUser, (req, res, next) => {
+    .delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
 
         Promotions.findByIdAndRemove(req.params.promoId).then((response) => {
 
